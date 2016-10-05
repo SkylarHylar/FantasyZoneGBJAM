@@ -2,6 +2,7 @@ love.graphics.setDefaultFilter("nearest","nearest")
 
 require('menu')
 require('game')
+require('enemy')
 
 function love.load()
 	min_dt = 1/60
@@ -12,27 +13,20 @@ function love.load()
 	
 	controltype = "keyboard"
 	controls = {}
+--  x = control row	
+--	A =      controls[x][1],
+--	B =      controls[x][2],
+--	Start =  controls[x][3],
+--	Select = controls[x][4],
+--	Up =     controls[x][5],
+--	Down =   controls[x][6],
+--	Left =   controls[x][7],
+--	Right =  controls[x][8],
 	controls = {
-	A =      'l',
-	B =      'k',
-	Start =  'h',
-	Select = 'g',
-	Up =     'w',
-	Down =   's',
-	Left =   'a',
-	Right =  'd',
+		{'l','k','h','g','w','s','a','d',},
+		{'x','z','return','space','up','down','left','right',},
 	}
-	defcontrols = {}
-	defcontrols = {
-	A =      'l',
-	B =      'k',
-	Start =  'h',
-	Select = 'g',
-	Up =     'w',
-	Down =   's',
-	Left =   'a',
-	Right =  'd',
-	}
+
 	
 	mode = 0
 	menuload()
@@ -67,268 +61,246 @@ function love.update(dt)
 end
 
 function love.keypressed(key,scancode,isrepeat)
-	if mode == 0 then
-		if key == controls.Up then
-			if sy == 0 then
-				if stage == nil then
-					if sx == 1 then
-						sx = 3
-					else
-						sx = sx - 1
-					end
-				else
-					if sx == 0 then
-						sx = 3
-					else
-						sx = sx - 1
-					end
-				end
-			elseif sy == 1 then
-				if sz == 0 then
-					if sx == 0 then
-						sx = 3
-					else
-						sx = sx - 1
-					end
-				elseif sz == 1 then
-					if sx == 0 then
-						sx = 4
-					else
-						sx = sx - 1
-					end
-				elseif sz == 2 then
-					if sx == 0 then
-						sx = 1
-					else
-						sx = 0
-					end
-				elseif sz == 3 then
-					if sx == 0 then
-						sx = 1
-					else
-						sx = 0
-					end
-				elseif sz == 4 then
-					if sx == 0 then
-						sx = 2
-					else
-						sx = sx - 1
-					end
-				end
-			end
-		elseif key == controls.Down then
-			if sy == 0 then
-				if stage == nil then
-					if sx == 3 then
-						sx = 1
-					else
-						sx = sx + 1
-					end
-				else
-					if sx == 3 then
-						sx = 0
-					else
-						sx = sx + 1
-					end
-				end
-			elseif sy == 1 then
-				if sz == 0 then
-					if sx == 3 then
-						sx = 0
-					else
-						sx = sx + 1
-					end
-				elseif sz == 1 then
-					if sx == 4 then
-						sx = 0
-					else
-						sx = sx + 1
-					end
-				elseif sz == 2 then
-					if sx == 1 then
-						sx = 0
-					else
-						sx = 1
-					end
-				elseif sz == 3 then
-					if sx == 1 then
-						sx = 0
-					else
-						sx = 1
-					end
-				elseif sz == 4 then
-					if sx == 2 then
-						sx = 0
-					else
-						sx = sx + 1
-					end
-				end
-			end
-		elseif key == controls.A then
-			if sy == 0 then
-				if sx == 2 then
-					sy = 1
-					sx = 0
-				elseif sx == 3 then
-					love.event.quit()
-				elseif sx == 0 then
-					modeswitch(1)
-				else
-					stage = 0 
-					modeswitch(1)
-				end
-			elseif sy == 1 then
-				if sz == 0 then
-					if sx == 0 then
-						sz = 1
-					elseif sx == 1 then
-						sz = 2
-					elseif sx == 2 then
-						sz = 3
-					elseif sx == 3 then
-						sz = 4
-					end
-					sx = 0
-				elseif sz == 1 then
-					if sx == 0 then
-						scale = 2
-						love.window.setMode(320,288)
-						love.graphics.setScissor(0,0,320,288)
-					elseif sx == 1 then
-						scale = 3
-						love.window.setMode(480,432)
-						love.graphics.setScissor(0,0,480,432)
-					elseif sx == 2 then
-						scale = 5
-						love.window.setMode(800,720)
-						love.graphics.setScissor(0,0,800,720)
-					elseif sx == 3 then
-						scale = 7
-						love.window.setMode(1120,1008)
-						love.graphics.setScissor(0,0,1120,1008)
-					elseif sx == 4 then
-						scwidth,scale = love.window.getDesktopDimensions()
-						scale = scale / 144
-						love.window.setMode(scale * 160,scale * 144)
-						love.window.setFullscreen(true)
-						love.graphics.setScissor(((scwidth - (scale*160)) / 2),0,scale*160,scale * 144)
-					end
-					if love.window.getFullscreen() == true then
-						if sx ~= 4 then
-							love.window.setFullscreen(false)
-						end
-					end
-				elseif sz == 2 then
-					if sx == 0 then
-						if smusic == true then
-							smusic = false
-						else
-							smusic = true
-						end
-					elseif sx == 1 then
-						if ssound == true then
-							ssound = false
-						else
-							ssound = true
-						end
-					end
-				elseif sz == 3 then
-					if sx == 0 then
-						if slives == 3 then
-							slives = 5
-						elseif slives == 5 then
-							slives = 7
-						else
-							slives = 3
-						end
-					elseif sx == 1 then
-						if sprice == 1 then
-							sprice = 2
-						elseif sprice == 2 then
-							sprice = 0.5
-						else
-							sprice = 1
-						end
-					end
-				elseif sz == 4 then
-					if sx == 0 then
-						if keytype == 0 then
-							keytype = 1
-						elseif keytype == 1 then
-							keytype = 2
-						else
-							keytype = 0
-						end
-					elseif sx == 1 then
-						if layout == 0 then
-							layout = 1
-						else
-							layout = 0
-						end
-					elseif sx == 2 then
-						sz = 5
-						sx = 4
-						if layout == 0 then
-							controls.Up = 'w'
-							controls.Down = 's'
-							controls.Left = 'a'
-							controls.Right = 'd'
-							controls.A = 'l'
-							controls.B = 'k'
-							controls.Start =  'h'
-							controls.Select = 'g'
-							if keytype == 1 then
-								controls.Up = 'z'
-								controls.Left = 'q'
-							elseif keytype == 2 then
-								controls.Up = ','
-								controls.Down = 'o'
-								controls.Left = 'a'
-								controls.Right = 'e'
-								controls.A = 's'
-								controls.B = 'n'
-								controls.Select = 'd'
-							end
-						elseif layout == 1 then
-							controls.Up = 'up'
-							controls.Down = 'down'
-							controls.Left = 'left'
-							controls.Right = 'right'
-							controls.A = 'x'
-							controls.B = 'z'
-							controls.Start =  'return'
-							controls.Select = 'rshift'
-							if keytype == 1 then
-								controls.B = 'w'
-							elseif keytype == 2 then
-								controls.A = 'q'
-								controls.B = ';'
-							end
-						end
-					end
-				elseif sz == 5 then
-					sz = 0
-					sx = 0
-				end
-			end
-		elseif key == controls.B then
-			if sy == 1 then
-				if sz == 0 then
-					sy = 0
+	for x=1,2 do
+		if mode == 0 then
+			if key == controls[x][5] then
+				if sy == 0 then
 					if stage == nil then
-						sx = 1
+						if sx == 1 then
+							sx = 3
+						else
+							sx = sx - 1
+						end
 					else
+						if sx == 0 then
+							sx = 3
+						else
+							sx = sx - 1
+						end
+					end
+				elseif sy == 1 then
+					if sz == 0 then
+						if sx == 0 then
+							sx = 3
+						else
+							sx = sx - 1
+						end
+					elseif sz == 1 then
+						if sx == 0 then
+							sx = 4
+						else
+							sx = sx - 1
+						end
+					elseif sz == 2 then
+						if sx == 0 then
+							sx = 1
+						else
+							sx = 0
+						end
+					elseif sz == 3 then
+						if sx == 0 then
+							sx = 1
+						else
+							sx = 0
+						end
+					elseif sz == 4 then
+						if sx == 0 then
+							sx = 1
+						else
+							sx = 0
+						end
+					end
+				end
+			elseif key == controls[x][6] then
+				if sy == 0 then
+					if stage == nil then
+						if sx == 3 then
+							sx = 1
+						else
+							sx = sx + 1
+						end
+					else
+						if sx == 3 then
+							sx = 0
+						else
+							sx = sx + 1
+						end
+					end
+				elseif sy == 1 then
+					if sz == 0 then
+						if sx == 3 then
+							sx = 0
+						else
+							sx = sx + 1
+						end
+					elseif sz == 1 then
+						if sx == 4 then
+							sx = 0
+						else
+							sx = sx + 1
+						end
+					elseif sz == 2 then
+						if sx == 1 then
+							sx = 0
+						else
+							sx = 1
+						end
+					elseif sz == 3 then
+						if sx == 1 then
+							sx = 0
+						else
+							sx = 1
+						end
+					elseif sz == 4 then
+						if sx == 1 then
+							sx = 0
+						else
+							sx = 1
+						end
+					end
+				end
+			elseif key == controls[x][1] then
+				if sy == 0 then
+					if sx == 2 then
+						sy = 1
+						sx = 0
+					elseif sx == 3 then
+						love.event.quit()
+					elseif sx == 0 then
+						modeswitch(1)
+					else
+						stage = 0 
+						modeswitch(1)
+					end
+				elseif sy == 1 then
+					if sz == 0 then
+						sz = sx + 1
+						sx = 0
+					elseif sz == 1 then
+						if sx == 0 then
+							scale = 2
+							love.window.setMode(320,288)
+							love.graphics.setScissor(0,0,320,288)
+						elseif sx == 1 then
+							scale = 3
+							love.window.setMode(480,432)
+							love.graphics.setScissor(0,0,480,432)
+						elseif sx == 2 then
+							scale = 5
+							love.window.setMode(800,720)
+							love.graphics.setScissor(0,0,800,720)
+						elseif sx == 3 then
+							scale = 7
+							love.window.setMode(1120,1008)
+							love.graphics.setScissor(0,0,1120,1008)
+						elseif sx == 4 then
+							scwidth,scale = love.window.getDesktopDimensions()
+							scale = scale / 144
+							love.window.setMode(scale * 160,scale * 144)
+							love.window.setFullscreen(true)
+							love.graphics.setScissor(((scwidth - (scale*160)) / 2),0,scale*160,scale * 144)
+						end
+						if love.window.getFullscreen() == true then
+							if sx ~= 4 then
+								love.window.setFullscreen(false)
+							end
+						end
+					elseif sz == 2 then
+						if sx == 0 then
+							if smusic == true then
+								smusic = false
+							else
+								smusic = true
+							end
+						elseif sx == 1 then
+							if ssound == true then
+								ssound = false
+							else
+								ssound = true
+							end
+						end
+					elseif sz == 3 then
+						if sx == 0 then
+							if slives == 3 then
+								slives = 5
+							elseif slives == 5 then
+								slives = 7
+							else
+								slives = 3
+							end
+						elseif sx == 1 then
+							if sprice == 1 then
+								sprice = 2
+							elseif sprice == 2 then
+								sprice = 0.5
+							else
+								sprice = 1
+							end
+						end
+					elseif sz == 4 then
+						if sx == 0 then
+							if keytype == 0 then
+								keytype = 1
+							elseif keytype == 1 then
+								keytype = 2
+							else
+								keytype = 0
+							end
+						elseif sx == 1 then
+							sz = 5
+							sx = 4
+							if keytype == 0 then
+								controls[1][5] = 'w'
+								controls[1][6] = 's'
+								controls[1][7] = 'a'
+								controls[1][8] = 'd'
+								controls[1][1] = 'l'
+								controls[1][2] = 'k'
+								controls[1][4] = 'g'
+								controls[2][1] = 'x'
+								controls[2][2] = 'z'
+							elseif keytype == 1 then
+								controls[1][5] = 'z'
+								controls[1][7] = 'q'
+								controls[2][2] = 'w'
+							elseif keytype == 2 then
+								controls[1][5] = ','
+								controls[1][6] = 'o'
+								controls[1][7] = 'a'
+								controls[1][8] = 'e'
+								controls[1][1] = 's'
+								controls[1][2] = 'n'
+								controls[1][4] = 'd'
+								controls[2][1] = 'q'
+								controls[2][2] = ';'
+							end
+						end
+					elseif sz == 5 then
+						sz = 6
+						sx = 4
+					elseif sz == 6 then
+						sz = 0
 						sx = 0
 					end
-				elseif sz ~= 4 or 5 then
-					sz = 0
-					sx = 0
+				end
+			elseif key == controls[x][2] then
+				if sy == 1 then
+					if sz == 0 then
+						sy = 0
+						if stage == nil then
+							sx = 1
+						else
+							sx = 0
+						end
+					elseif sz ~= 6 and sz ~= 5 then
+						sz = 0
+						sx = 0
+					end
 				end
 			end
 		end
 	end
 end
-
 function love.draw()
 	love.graphics.clear()
 	if love.window.getFullscreen() == true then

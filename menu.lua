@@ -24,7 +24,6 @@ function menudraw()
 	love.graphics.draw(logo,5,0,0,1,1,0,0)
 	love.graphics.draw(cursor,36,88 + (sx * 10))
 	love.graphics.setColor(64,64,64)
-	love.graphics.print(sz,0,0)
 	if sy == 0 then
 		if stage ~= nil then
 			love.graphics.print('CONTINUE', 60, 90)

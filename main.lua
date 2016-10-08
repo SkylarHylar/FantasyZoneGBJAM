@@ -298,6 +298,14 @@ function love.keypressed(key,scancode,isrepeat)
 					end
 				end
 			end
+		elseif mode == 1 then
+			if key == controls[x][3] then
+				if pause == false then
+					pause = true
+				else
+					pause = false
+				end
+			end
 		end
 	end
 end

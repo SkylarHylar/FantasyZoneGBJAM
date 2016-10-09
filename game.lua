@@ -1,4 +1,5 @@
 require('enemy')
+require('menu')
 
 function gameload()
 	player = {}
@@ -21,12 +22,22 @@ function gameload()
 	pause        = false
 	score        = 0
 	money        = 0
+	lives        = slives
 	--player.timer is the amount of time a bought weapon lasts.
 	death = false
 	dtimer = 0
 	boss = false
 	
+	tx = 0
+	
 	shot = love.audio.newSource('/Sounds/shoot.wav', 'static')
+	drop = love.audio.newSource('/Sounds/drop.wav', 'static')
+	music = love.audio.newSource('/Music/'..stage..'.wav','static')
+	music:setVolume(0.5)
+	music:setLooping(true)
+	musicstart = love.audio.newSource('/Music/'..stage..'-s.wav')
+	musicstart:setVolume(0.5)
+	love.audio.play(musicstart)
 	
 	enemy = {}
 	--e[1] = x
@@ -76,11 +87,11 @@ function gameload()
 	--5: Smart Bomb
 	--6: Fire Bomb
 	--7: Heavy Bomb
-		{8,8,'0',8,8,1},
+		{9,15,'0',8,8,1},
 		{3,10,'1',20,30,2},
 		{3,10,'2',24,8,1},
 		{3,10,'3',4,4,1},
-		{3,10,'4',6,8,4},
+		{3,30,'4',6,8,4},
 		{3,10,'5',8,8,1},
 		{3,10,'6',8,8,32},
 		{3,10,'7',8,8,32},
@@ -138,6 +149,37 @@ function gameload()
 	bg = love.graphics.newImage('/Sprites/Levels/'..stage..'.png')
 end
 
+function gamereload()
+	player.x     = 76
+	player.y     = 70
+	player.dir   = 0
+	player.gun   = 0
+	player.gs    = false
+	player.gd    = 0
+	player.bs    = false
+	player.bd    = 0
+	player.bomb  = 4
+	player.engine= 0
+	player.speed = (player.engine * 1.5) + 1.5
+	player.timer = 0
+	player.coast = true
+	pause        = false
+	--player.timer is the amount of time a bought weapon lasts.
+	love.audio.play(musicstart)
+	death = false
+	dtimer = 0
+	for i,b in ipairs(enemy) do
+		table.remove(enemy,i)
+	end
+	for i,b in ipairs(shots) do
+		table.remove(shots,i)
+	end
+	for i,b in ipairs(spawner) do
+		b[6] = 0
+	end
+	enemy = {}
+end
+
 function createenemy(x,y,id,sp)
 	local e = {}
 	e = {x,y,0,0,0,nil,sp,}
@@ -146,65 +188,74 @@ function createenemy(x,y,id,sp)
 end
 
 function kill()
-	if death == false and dtimer < dtotal then
+	if death == false and dtimer == 0 then
 		dtimer = dtotal
 		death = true
+		if musicstart:isPlaying() == true then
+			love.audio.pause(musicstart)
+		end
+		love.audio.stop(music)
 		for c=0,15 do
 			local b = {}
-			b = {player.x + 2,player.y + 1,c}
+			b = {player.x,player.y + 1,c}
 			table.insert(booms,b)
 		end
 	else	
-		if dtimer >= dtotal - 3 then
+		if dtimer >= dtotal - 3  and dtimer > dtotal - 10 then
 			for i,b in ipairs(booms) do
 				if b[3] == 0 then
-					b[2] = b[2] - 4
+					b[2] = b[2] - 2
 				elseif b[3] == 1 then
-					b[1] = b[1] + 1
-					b[2] = b[2] - 3
+					b[1] = b[1] + 0.5
+					b[2] = b[2] - 1.5
 				elseif b[3] == 2 then
-					b[1] = b[1] + 2
-					b[2] = b[2] - 2
-				elseif b[3] == 3 then
-					b[1] = b[1] + 3
-					b[2] = b[2] - 1
-				elseif b[3] == 4 then
-					b[1] = b[1] + 4
-				elseif b[3] == 5 then
-					b[1] = b[1] + 3
-					b[2] = b[2] + 1
-				elseif b[3] == 6 then
-					b[1] = b[1] + 2
-					b[2] = b[2] + 2
-				elseif b[3] == 7 then
 					b[1] = b[1] + 1
-					b[2] = b[2] + 3
-				elseif b[3] == 8 then
-					b[2] = b[2] + 4
-				elseif b[3] == 9 then
-					b[1] = b[1] - 1
-					b[2] = b[2] + 3
-				elseif b[3] == 10 then
-					b[1] = b[1] - 2
-					b[2] = b[2] + 2
-				elseif b[3] == 11 then
-					b[1] = b[1] - 3
-					b[2] = b[2] + 1
-				elseif b[3] == 12 then
-					b[1] = b[1] - 4
-				elseif b[3] == 13 then
-					b[1] = b[1] - 3
 					b[2] = b[2] - 1
-				elseif b[3] == 14 then
-					b[1] = b[1] - 2
-					b[2] = b[2] - 2
-				elseif b[3] == 15 then
+				elseif b[3] == 3 then
+					b[1] = b[1] + 1.5
+					b[2] = b[2] - 0.5
+				elseif b[3] == 4 then
+					b[1] = b[1] + 2
+				elseif b[3] == 5 then
+					b[1] = b[1] + 1.5
+					b[2] = b[2] + 0.5
+				elseif b[3] == 6 then
+					b[1] = b[1] + 1
+					b[2] = b[2] + 1
+				elseif b[3] == 7 then
+					b[1] = b[1] + 0.5
+					b[2] = b[2] + 1.5
+				elseif b[3] == 8 then
+					b[2] = b[2] + 2
+				elseif b[3] == 9 then
+					b[1] = b[1] - 0.5
+					b[2] = b[2] + 1.5
+				elseif b[3] == 10 then
 					b[1] = b[1] - 1
-					b[2] = b[2] - 3
+					b[2] = b[2] + 1
+				elseif b[3] == 11 then
+					b[1] = b[1] - 1.5
+					b[2] = b[2] + 0.5
+				elseif b[3] == 12 then
+					b[1] = b[1] - 2
+				elseif b[3] == 13 then
+					b[1] = b[1] - 1.5
+					b[2] = b[2] - 0.5
+				elseif b[3] == 14 then
+					b[1] = b[1] - 1
+					b[2] = b[2] - 1
+				elseif b[3] == 15 then
+					b[1] = b[1] - 0.5
+					b[2] = b[2] - 1.5
 				end
 			end
+		elseif dtimer <= dtotal - 10 then
+			modeswitch(0)
 		else
-			death = false
+			lives = lives - 1
+			if lives >= 1 then
+				gamereload()
+			end
 			for i,b in ipairs(booms) do
 				table.remove(booms,i)
 			end
@@ -242,7 +293,7 @@ function shoot(ent,k)
 			ent[7] = ent[7] + bulletdb[ent[5] + 1][1]
 		end
 	elseif ent[5] == 4 then
-		ent[1] = ent[1] + ((ent[6] * 1.5) - (((ent[6] * 1.5) * ent[3]) * 3))
+		ent[1] = ent[1] + ((ent[6] * 1.5) - (((ent[6] * 1.5) * ent[3]) * 2))
 		if ent[2] >= 140 then
 			table.remove(shots,k)
 			player.bs = false
@@ -258,8 +309,19 @@ function shoot(ent,k)
 	end
 end
 
+function muzac()
+	local msw = musicstart:isStopped()
+	if msw == true then
+		love.audio.play(music)
+	end
+	if boss == true then
+		mtim = dtotal
+	end
+end
+
 function gameupdate()
 	if pause == false and death == false then
+		muzac()
 		player.coast = true
 		for x=1,2 do
 			if love.keyboard.isDown(controls[x][7]) then
@@ -310,6 +372,8 @@ function gameupdate()
 						trigger(player,player.bomb,0)
 						player.bd = bulletdb[player.bomb + 1][2]
 						player.bs = true
+						love.audio.stop(drop)
+						love.audio.play(drop)
 					end
 				else
 					player.bd = player.bd - 1
@@ -384,7 +448,6 @@ function collision()
 						if e[7] == q then
 							p[6] = 0
 						end
-						print(e[7])
 					end
 					table.remove(enemy,d)
 					hit = true
@@ -413,25 +476,31 @@ function collision()
 		end
 	end
 	--=====PLAYER COLLISION=====--
-	local hit = false
-	--for d,e in ipairs(enemy) do
-		--if (player.y + player.ybound >= e[2] and player.y + player.ybound <= e[2] + enemydb[e[4] + 1][4]) or (player.y >= e[2] and player.y <= e[2] + enemydb[e[4] + 1][4])then
-			--if (player.x + player.xbound >= e[1] and player.x + player.xbound <= e[1] + enemydb[e[4] + 1][3]) or (player.x >= e[1]and player.x <= e[1] + enemydb[e[4] + 1][3])then
-				--table.remove(enemy,d)
-				--hit = true
-			--end
-		--end
-	--end
-	--for d,e in ipairs(spawner) do
-		--if (player.y + player.ybound >= e[2] and player.y + player.ybound <= e[2] + spawnerdb[stage + 1][4]) or (player.y >= e[2] and player.y <= e[2] + spawnerdb[stage + 1][4])then
-			--if (player.x + player.xbound >= e[1] and player.x + player.xbound <= e[1] + spawnerdb[stage + 1][3]) or (player.x >= e[1] and player.x <= e[1] + spawnerdb[stage + 1][3])then
-				--table.remove(spawner,d)
-				--hit = true
-			--end
-		--end
-	--end
-	if hit == true then
-		death = true
+	local ouch = false
+	for d,e in ipairs(enemy) do
+		local info = e[4] + 1
+		local ey = e[2]
+		local eyb = enemydb[info][5]
+		local ex = e[1]
+		local exb = enemydb[info][4]
+		if (player.y + player.ybound >= ey and player.y + player.ybound <= ey + eyb) or (player.y >= ey and player.y <= ey + eyb)then
+			if (player.x + player.xbound >= ex and player.x + player.xbound <= ex + exb) or (player.x >= ex and player.x <= ex + exb)then
+				table.remove(enemy,d)
+				ouch = true
+			end
+		end
+	end
+	for d,e in ipairs(spawner) do
+		if (player.y + player.ybound >= e[2] and player.y + player.ybound <= e[2] + spawnerdb[stage + 1][4]) or (player.y >= e[2] and player.y <= e[2] + spawnerdb[stage + 1][4])then
+			if (player.x + player.xbound >= e[1] and player.x + player.xbound <= e[1] + spawnerdb[stage + 1][3]) or (player.x >= e[1] and player.x <= e[1] + spawnerdb[stage + 1][3])then
+				table.remove(spawner,d)
+				ouch = true
+			end
+		end
+	end
+	if ouch == true then
+		kill()
+		ouch = false
 	end
 end
 
@@ -447,11 +516,9 @@ end
 
 function gamedraw()
 	camx = player.x - 76
-	if pause == false then	
+	if pause == false and death == false then	
 		love.graphics.translate((camx * -1) - 640,0)
 		bgdraw(0)
-		bgdraw(-640)
-		bgdraw(-1280)
 		truedraw()
 		love.graphics.translate(640,0)
 		truedraw()
@@ -465,17 +532,54 @@ function gamedraw()
 		end
 		love.graphics.translate(640,0)
 		truedraw()
-	elseif pause == true or death == true then
+	elseif pause == true then
+		--I can show 20.5 characters.
+		bgdraw(camx)
+		love.graphics.rectangle('fill',48,56,65,34)
+		love.graphics.setColor(64,64,64)
+		love.graphics.rectangle('line',48,56,65,34)
+		local weap = 'TWIN SHOT'
+		if player.gun == 1 then
+			weap = 'WIDE SHOT'
+		elseif player.gun == 2 then
+			weap = 'LASER SHOT'
+		elseif player.gun == 3 then
+			weap = '7-WAY SHOT'
+		end
+		love.graphics.print(weap,0,1)
+		local bomb = 'ONE BOMB'
+		if player.bomb == 5 then
+			bomb = 'DUAL BOMB'
+		elseif player.bomb == 6 then
+			bomb = 'SMART BOMB'
+		elseif player.bomb == 7 then
+			bomb = 'FIRE BOMB'
+		elseif player.bomb == 8 then
+			bomb = 'HEAVY BOMB'
+		end
+		love.graphics.print(bomb,87,1)
+		love.graphics.print(lives,150,136)
+		love.graphics.print("SHOP",64,60)
+		love.graphics.print("SELECT",64,70)
+		love.graphics.print("MENU",64,80)
+		love.graphics.setColor(255,255,255)
+		love.graphics.draw(player.img,50,58 + (10 * tx))
+	else
 		bgdraw(camx)
 		for i,e in ipairs(booms) do
-			love.graphics.draw(boom,e[1],e[2],0,1,1,0,0)
-			print('banana')
+			love.graphics.draw(boom,e[1],e[2],0,1,1,camx,0)
+		end
+		if dtimer <= dtotal - 5 then 
+			love.graphics.setColor(64,64,64)
+			love.graphics.print("GAME OVER",40,76)
 		end
 	end
 end
 
 function bgdraw(offx)
-	love.graphics.draw(bg,0,0,0,1,1,offx,0)
+	love.graphics.draw(bg,0,0,0,1,1,0 + offx,0)
+	love.graphics.draw(bg,0,0,0,1,1,-640 + offx,0)
+	love.graphics.draw(bg,0,0,0,1,1,-1280 + offx,0)
 end
 
 function truedraw()

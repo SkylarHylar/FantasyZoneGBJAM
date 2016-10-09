@@ -3,6 +3,7 @@ love.graphics.setDefaultFilter("nearest","nearest")
 require('menu')
 require('game')
 require('enemy')
+require('shop')
 
 function love.load()
 	min_dt = 1/60
@@ -43,6 +44,12 @@ function modeswitch(m)
 		gameload()
 	elseif m == 2 then
 		mode = 2
+		shopload()
+	elseif m == 3 then
+		mode = 3
+		selectload()
+	elseif m == 4 then
+		mode = 4
 		transload()
 	else
 		mode = 0
@@ -54,6 +61,12 @@ function love.update(dt)
 	next_time = next_time + min_dt
 	dtotal = dtotal + dt
 	if mode == 1 then
+		gameupdate()
+	elseif mode == 2 then
+		shopupdate()
+	elseif mode == 3 then
+		selectupdate()
+	elseif mode == 4 then
 		gameupdate()
 	else
 		menuupdate()
@@ -221,12 +234,12 @@ function love.keypressed(key,scancode,isrepeat)
 						end
 					elseif sz == 3 then
 						if sx == 0 then
-							if slives == 3 then
-								slives = 5
-							elseif slives == 5 then
-								slives = 7
+							if slives == 2 then
+								slives = 4
+							elseif slives == 4 then
+								slives = 6
 							else
-								slives = 3
+								slives = 2
 							end
 						elseif sx == 1 then
 							if sprice == 1 then
@@ -302,8 +315,36 @@ function love.keypressed(key,scancode,isrepeat)
 			if key == controls[x][3] then
 				if pause == false then
 					pause = true
+					love.audio.pause(music)
 				else
 					pause = false
+					love.audio.resume(musicstart)
+					love.audio.resume(music)
+				end
+			end
+			if pause == true then
+				if key == controls[x][5] then
+					if tx == 0 then
+						tx = 2
+					else
+						tx = tx - 1
+					end
+				elseif key == controls[x][6] then
+					if tx == 2 then
+						tx = 0
+					else
+						tx = tx + 1
+					end
+				end
+				if key == controls[x][1] then
+					if tx == 1 then
+						modeswitch(3)
+					elseif tx == 2 then
+						stage = nil
+						modeswitch(0)
+					else
+						modeswitch(2)
+					end
 				end
 			end
 		end
@@ -321,6 +362,10 @@ function love.draw()
 		if mode == 1 then
 			gamedraw()
 		elseif mode == 2 then
+			shopdraw()
+		elseif mode == 3 then
+			selectdraw()
+		elseif mode == 4 then
 			transdraw()
 		else
 			menudraw()

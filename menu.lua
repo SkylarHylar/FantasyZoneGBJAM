@@ -58,7 +58,7 @@ function menudraw()
 			end
 		elseif sz == 3 then
 			love.graphics.print('LIVES: '..slives, 60, 90)
-			love.graphics.print('PRICES: '..sprice.."X", 60, 100)
+			love.graphics.print('PRICES: '..(sprice + 1).."X", 60, 100)
 		elseif sz == 4 then
 			if keytype == 0 then
 				love.graphics.print('KEYTYPE:QWERTY', 50, 90)
